@@ -106,24 +106,173 @@ class LoginPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle login logic
-                  },
-                  child: const Text('Login'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle registration logic
-                  },
-                  child: const Text('Register'),
-                ),
-              ],
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DashboardPage()),
+                );
+              },
+              child: const Text('Login'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class DashboardPage extends StatelessWidget {
+  const DashboardPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+      ),
+      body: const Center(
+        child: Text('Welcome to the Dashboard!'),
+      ),
+    );
+  }
+}
+
+class SendMoneyPage extends StatefulWidget {
+  const SendMoneyPage({super.key});
+
+  @override
+  _SendMoneyPageState createState() => _SendMoneyPageState();
+}
+
+class _SendMoneyPageState extends State<SendMoneyPage> {
+  final _formKey = GlobalKey<FormState>();
+  String? _recipientName;
+  double? _amount;
+  String _paymentMethod = 'Bank Transfer';
+  bool _isFavorite = false;
+  bool _showSuccessMessage = false;
+
+  final List<String> _paymentMethods = ['Bank Transfer', 'Credit Card', 'PayPal'];
+
+  void _validateAndSubmit() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+  
+      setState(() {
+        _showSuccessMessage = true;
+        // Use _recipientName here
+        print('Sending money to: $_recipientName');
+      });
+  
+      // Hide the success message after 2 seconds
+      Future.delayed(const Duration(seconds: 2), () {
+        setState(() {
+          _showSuccessMessage = false;
+        });
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Send Money'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              // Recipient Name Field
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Recipient Name'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter recipient\'s name';
+                  }
+                  return null;
+                },
+                onSaved: (value) => _recipientName = value,
+              ),
+              const SizedBox(height: 16),
+              
+              // Amount Field
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Amount'),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an amount';
+                  }
+                  return null;
+                },
+                onSaved: (value) => _amount = double.parse(value!),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Payment Method Dropdown
+              DropdownButtonFormField<String>(
+                value: _paymentMethod,
+                items: _paymentMethods.map((method) {
+                  return DropdownMenuItem(
+                    value: method,
+                    child: Text(method),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _paymentMethod = value!;
+                  });
+                },
+                decoration: const InputDecoration(labelText: 'Payment Method'),
+              ),
+              const SizedBox(height: 16),
+              
+              // Favorite Switch
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Mark as Favorite'),
+                  Switch(
+                    value: _isFavorite,
+                    onChanged: (value) {
+                      setState(() {
+                        _isFavorite = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 30),
+              
+              // Success Message Animation
+              AnimatedOpacity(
+                opacity: _showSuccessMessage ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 500),
+                child: const Text(
+                  'Transaction Successful!',
+                  style: TextStyle(color: Colors.green, fontSize: 18),
+                ),
+              ),
+              
+              const SizedBox(height: 30),
+              // Send Money Button
+              ElevatedButton(
+                onPressed: _validateAndSubmit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                  textStyle: const TextStyle(fontSize: 18, color: Colors.white), // Set the text color here
+                ),
+                child: const Text('Send Money'),
+              ),
+            ],
+          ),
         ),
       ),
     );
